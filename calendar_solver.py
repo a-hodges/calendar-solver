@@ -1,9 +1,11 @@
 import time
 import argparse
+import calendar
 from io import StringIO
 from string import ascii_uppercase
 from operator import getitem
 from functools import partial
+from datetime import date
 
 from clingo import Control
 from clingo.symbol import Symbol, Function, String, Number, SymbolType
@@ -167,10 +169,15 @@ def halt(model):
     return False
 
 def main(args):
-    month = args.month if args.month is not None else input("Month (3 letter): ")
-    month = month[:3].lower()
-    day = args.day if args.day is not None else input("Day: ")
-    day = day[:3].lower()
+    if args.today:
+        today = date.today()
+        month = calendar.month_abbr[today.month].lower()
+        day = str(today.day)
+    else:
+        month = args.month if args.month is not None else input("Month (3 letter): ")
+        month = month[:3].lower()
+        day = args.day if args.day is not None else input("Day: ")
+        day = day[:3].lower()
     lp = define_lp()
     if args.output is not None:
         with open(args.output, "w") as f:
@@ -193,6 +200,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--solver", default="crafty", choices=solvers, help="The clingo solver strategy to use.")
     parser.add_argument("-o", "--output", default=None, help="File to output the logic program to.")
     parser.add_argument("-t", "--time", action="store_true", help="Display solve time after solving.")
+    parser.add_argument("--today", action="store_true", help="Use today's date. Overrides -m and -d.")
     args = parser.parse_args()
 
     main(args)
